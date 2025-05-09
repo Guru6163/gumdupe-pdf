@@ -1,11 +1,28 @@
+'use client'
 import { Uploader } from "@/components/uploader"
 import { Heading } from "@/components/ui/heading"
 import { DashboardNav } from "@/components/dashboard-nav"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, Clock, BarChart3 } from "lucide-react"
+import { useEffect, useState } from "react"
 
 export default function DashboardPage() {
+  const [count,setCount] = useState<number>(0)
+  interface RecentData {
+    timestamp?: string;
+  }
+
+  const [recent, setRecent] = useState<RecentData>({})
+
+  useEffect(()=>{
+    const data = JSON.parse(window.localStorage.getItem('pdf_extractions') || '[]')
+
+    setCount(data?.length)
+    setRecent(data[data.length - 1] || {})
+
+    console.log(recent)
+  },[])
   return (
     <div className="flex min-h-screen flex-col">
       <DashboardHeader />
@@ -22,7 +39,7 @@ export default function DashboardPage() {
                   <FileText className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">12</div>
+                  <div className="text-2xl font-bold">{count}</div>
                   <p className="text-xs text-muted-foreground">+2 from last month</p>
                 </CardContent>
               </Card>
@@ -32,7 +49,10 @@ export default function DashboardPage() {
                   <Clock className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">2 days ago</div>
+                 <div className="text-2xl font-bold">
+  {recent.timestamp ? new Date(recent.timestamp).toLocaleDateString() : "N/A"}
+</div>
+
                   <p className="text-xs text-muted-foreground">Last extraction performed</p>
                 </CardContent>
               </Card>
