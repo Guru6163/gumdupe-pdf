@@ -6,7 +6,6 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import {
-  ClerkProvider,
   SignInButton,
   SignUpButton,
   SignedIn,
@@ -66,6 +65,9 @@ export function Navbar() {
               <SignUpButton />
             </SignedOut>
             <SignedIn>
+               <Link href="/dashboard" className="text-sm font-medium transition-colors hover:text-primary">
+      Dashboard
+    </Link>
               <UserButton />
             </SignedIn>
         </div>
@@ -101,10 +103,11 @@ export function Navbar() {
               ))}
             </nav>
             <SignedOut>
-              <SignInButton />
+              <SignInButton forceRedirectUrl={"/dashboard"} />
               <SignUpButton />
             </SignedOut>
             <SignedIn>
+              <link href="dashboard">Dashboard</link>
               <UserButton />
             </SignedIn>
           </div>
