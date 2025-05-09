@@ -25,7 +25,8 @@ export function DataTable({ headers, rows }: DataTableProps) {
 
   // Filter rows based on search term
   const filteredRows = rows.filter((row) => {
-    const values = Object.values(row.values)
+    const values = Object.values(row.values || {})
+
     return values.some((value) => value.toLowerCase().includes(searchTerm.toLowerCase()))
   })
 

@@ -16,7 +16,6 @@ import {
   TableCell,
 } from "@/components/ui/table";
 
-
 export function Uploader() {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
@@ -102,6 +101,24 @@ export function Uploader() {
 
       setExtractedData(structuredData);
 
+      // Save to localStorage with a unique ID and timestamp
+      const timestamp = new Date().toISOString();
+      const id = crypto.randomUUID(); // generates a unique identifier
+      const storageKey = `pdf_data_${timestamp}_${id}`;
+
+      const newEntry = {
+        id,
+        timestamp,
+        fileName: file.name,
+        data: structuredData,
+      };
+
+      // Retrieve current saved entries or initialize
+      const existing = window.localStorage.getItem("pdf_extractions");
+      const parsedExisting = existing ? JSON.parse(existing) : [];
+      parsedExisting.push(newEntry);
+      window.localStorage.setItem("pdf_extractions", JSON.stringify(parsedExisting));
+
       setUploadProgress(100);
       setIsSubmitted(true);
 
@@ -130,35 +147,34 @@ export function Uploader() {
     });
   }
 
-const renderTable = (data: Record<string, string>[]) => {
-  if (!Array.isArray(data) || data.length === 0) {
-    return <p>Data format not supported</p>;
-  }
+  const renderTable = (data: Record<string, string>[]) => {
+    if (!Array.isArray(data) || data.length === 0) {
+      return <p>Data format not supported</p>;
+    }
 
-  const headers = Object.keys(data[0]);
+    const headers = Object.keys(data[0]);
 
-  return (
-    <Table className="mt-4 text-sm">
-      <TableHeader>
-        <TableRow>
-          {headers.map((header) => (
-            <TableHead key={header}>{header}</TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((row, rowIndex) => (
-          <TableRow key={rowIndex}>
+    return (
+      <Table className="mt-4 text-sm">
+        <TableHeader>
+          <TableRow>
             {headers.map((header) => (
-              <TableCell key={header}>{row[header]}</TableCell>
+              <TableHead key={header}>{header}</TableHead>
             ))}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-};
-
+        </TableHeader>
+        <TableBody>
+          {data.map((row, rowIndex) => (
+            <TableRow key={rowIndex}>
+              {headers.map((header) => (
+                <TableCell key={header}>{row[header]}</TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    );
+  };
 
   return (
     <Card

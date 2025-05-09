@@ -41,7 +41,6 @@ export async function POST(request: NextRequest) {
     const extractedData = result.choices[0].message.content;
 
     if (typeof extractedData === "string") {
-      console.log(JSON.parse(extractedData))
       return NextResponse.json({ data: JSON.parse(extractedData) })
     }
 
