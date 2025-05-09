@@ -1,25 +1,33 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { Menu, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { usePathname } from "next/navigation"
+import { useState } from "react";
+import Link from "next/link";
+import { Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
+import {
+  ClerkProvider,
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 
 export function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const pathname = usePathname()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+    setIsMenuOpen(!isMenuOpen);
+  };
 
   const navItems = [
     { name: "Home", href: "/" },
     { name: "Features", href: "/#features" },
     { name: "Pricing", href: "/#pricing" },
     { name: "Testimonials", href: "/#testimonials" },
-  ]
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -39,7 +47,9 @@ export function Navbar() {
               key={item.name}
               href={item.href}
               className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === item.href ? "text-foreground" : "text-muted-foreground"
+                pathname === item.href
+                  ? "text-foreground"
+                  : "text-muted-foreground"
               }`}
             >
               {item.name}
@@ -48,17 +58,22 @@ export function Navbar() {
         </nav>
 
         <div className="hidden md:flex items-center gap-4">
-          <Button variant="outline" asChild>
-            <Link href="/login">Log in</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/signup">Sign up</Link>
-          </Button>
+         <SignedOut>
+              <SignInButton />
+              <SignUpButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
         </div>
 
         {/* Mobile Menu Button */}
         <button className="md:hidden" onClick={toggleMenu}>
-          {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          {isMenuOpen ? (
+            <X className="h-6 w-6" />
+          ) : (
+            <Menu className="h-6 w-6" />
+          )}
         </button>
       </div>
 
@@ -72,7 +87,9 @@ export function Navbar() {
                   key={item.name}
                   href={item.href}
                   className={`text-sm font-medium transition-colors hover:text-primary ${
-                    pathname === item.href ? "text-foreground" : "text-muted-foreground"
+                    pathname === item.href
+                      ? "text-foreground"
+                      : "text-muted-foreground"
                   }`}
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -80,17 +97,16 @@ export function Navbar() {
                 </Link>
               ))}
             </nav>
-            <div className="flex flex-col space-y-2">
-              <Button variant="outline" asChild>
-                <Link href="/login">Log in</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/signup">Sign up</Link>
-              </Button>
-            </div>
+            <SignedOut>
+              <SignInButton />
+              <SignUpButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
           </div>
         </div>
       )}
     </header>
-  )
+  );
 }
