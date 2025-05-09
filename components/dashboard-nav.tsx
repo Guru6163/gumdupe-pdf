@@ -30,31 +30,6 @@ const items = [
     href: "/dashboard/history",
     icon: History,
   },
-  {
-    name: "Templates",
-    href: "/dashboard/templates",
-    icon: Template,
-  },
-  {
-    name: "Team",
-    href: "/dashboard/team",
-    icon: Users,
-  },
-  {
-    name: "Billing",
-    href: "/dashboard/billing",
-    icon: CreditCard,
-  },
-  {
-    name: "Settings",
-    href: "/dashboard/settings",
-    icon: Settings,
-  },
-  {
-    name: "Help",
-    href: "/dashboard/help",
-    icon: HelpCircle,
-  },
 ]
 
 export function DashboardNav() {

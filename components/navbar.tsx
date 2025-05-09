@@ -29,9 +29,12 @@ export function Navbar() {
     { name: "Testimonials", href: "/#testimonials" },
   ];
 
+  const isHomePage = pathname === "/";
+  console.log(pathname)
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto mx-auto flex h-16 items-center justify-between">
+      <div className={`mx-auto flex h-16 items-center justify-between ${isHomePage ? 'container' : ''}`}>
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center space-x-2">
             <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 text-transparent bg-clip-text">
