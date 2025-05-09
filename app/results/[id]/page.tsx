@@ -13,13 +13,7 @@ interface ResultsPageProps {
 export default async function ResultsPage({ params }: ResultsPageProps) {
   const { id } = params
 
-  // Fetch the extraction data from KV store
-  const extraction = await kv.get(`extraction:${id}`)
-
-  if (!extraction) {
-    notFound()
-  }
-
+  
   const { filename, timestamp, data } = extraction as any
 
   return (

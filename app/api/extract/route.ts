@@ -1,74 +1,54 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { generateObject } from "ai"
-import { anthropic } from "@ai-sdk/anthropic"
-import { z } from "zod"
-import { v4 as uuidv4 } from "uuid"
-import { kv } from "@vercel/kv"
+import { type NextRequest, NextResponse } from "next/server";
+import { OpenAI } from "openai";
+import fs from "fs";
+import path from "path";
+import pdfParse from "pdf-parse";
 
-// Define the schema for table data
-const TableRowSchema = z.object({
-  // This is a generic schema - adjust based on your specific needs
-  id: z.string(),
-  values: z.record(z.string(), z.string()),
-})
-
-const ExtractedDataSchema = z.object({
-  title: z.string().describe("The title or document name extracted from the PDF"),
-  summary: z.string().describe("A brief summary of what this document contains"),
-  tableHeaders: z.array(z.string()).describe("The column headers for the extracted table data"),
-  tableRows: z.array(TableRowSchema).describe("The rows of data extracted from the PDF"),
-  documentType: z.string().describe("The type of document (invoice, report, etc.)"),
-  metadata: z.record(z.string(), z.string()).optional().describe("Any additional metadata found in the document"),
-})
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData()
-    const pdfFile = formData.get("pdf") as File
+    const formData = await request.formData();
+    const pdfFile = formData.get("pdf") as File;
 
     if (!pdfFile || pdfFile.type !== "application/pdf") {
-      return NextResponse.json({ error: "Please upload a valid PDF file" }, { status: 400 })
+      return NextResponse.json({ error: "Please upload a valid PDF file" }, { status: 400 });
     }
 
-    // Generate a unique ID for this extraction
-    const extractionId = uuidv4()
+    // Convert the PDF file into an ArrayBuffer
+    const arrayBuffer = await pdfFile.arrayBuffer();
+    const pdfData = await pdfParse(Buffer.from(arrayBuffer));
 
-    // Process the PDF with Claude
-    const result = await generateObject({
-      model: anthropic("claude-3-5-sonnet-latest"),
+    // Use OpenAI to extract structured data from the PDF text
+    const result = await openai.chat.completions.create({
+      model: "gpt-4",  // You can choose any OpenAI model, such as GPT-4
       messages: [
         {
+          role: "system",
+          content:
+            "You are a document parser. Extract any table or tabular data you find in the document and return it in structured JSON format with two keys: Headers: an array of column names Rows: an array of arrays, where each sub-array represents one row of data",
+        },
+        {
           role: "user",
-          content: [
-            {
-              type: "text",
-              text: `Extract structured data from this PDF. 
-              If the PDF contains tables, extract them as structured data.
-              If there are multiple tables, focus on the most important one.
-              Identify column headers and row data accurately.
-              For each row, create a unique ID and organize values by their column headers.`,
-            },
-            {
-              type: "file",
-              data: await pdfFile.arrayBuffer(),
-              mimeType: "application/pdf",
-            },
-          ],
+          content: pdfData.text,  // Pass the extracted text from the PDF
         },
       ],
-      schema: ExtractedDataSchema,
-    })
+    });
 
-    // Store the extracted data in KV store
-    await kv.set(`extraction:${extractionId}`, {
-      filename: pdfFile.name,
-      timestamp: new Date().toISOString(),
-      data: result.object,
-    })
+    // Extracted data from OpenAI
+    const extractedData = result.choices[0].message.content;
 
-    return NextResponse.json({ id: extractionId })
+    if (typeof extractedData === "string") {
+      console.log(JSON.parse(extractedData))
+      return NextResponse.json({ data: JSON.parse(extractedData) })
+    }
+
+    return NextResponse.json({ data: extractedData });
+
   } catch (error) {
-    console.error("PDF extraction error:", error)
-    return NextResponse.json({ error: "Failed to process PDF" }, { status: 500 })
+    console.error("Error processing PDF:", error);
+    return NextResponse.json({ error: "Failed to process PDF" }, { status: 500 });
   }
 }

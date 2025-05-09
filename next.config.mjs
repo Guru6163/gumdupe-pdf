@@ -9,6 +9,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  serverExternalPackages: ['pdf-parse', 'openai'],
+
 }
 
 export default nextConfig
